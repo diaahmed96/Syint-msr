@@ -1,0 +1,1680 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>صيانة مصر - نظام إدارة الصيانة والحسابات</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0b0f19;
+            --card-bg: #131d31;
+            --card-inner: #0b0f19;
+            --border-color: #1e293b;
+            --border-glow: #334155;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Tajawal', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding-bottom: 40px;
+            font-size: 14px;
+        }
+
+        #login-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        .login-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 30px 24px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            text-align: center;
+        }
+
+        .login-card h2 { color: var(--accent); margin-bottom: 8px; font-size: 1.8rem; font-weight: 700; }
+        .login-card p { color: var(--text-muted); margin-bottom: 24px; font-size: 0.9rem; }
+
+        header {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 14px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .user-badge {
+            background: rgba(37, 99, 235, 0.15);
+            color: #60a5fa;
+            border: 1px solid rgba(37, 99, 235, 0.3);
+            padding: 5px 12px;
+            border-radius: 30px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .notice-ticker {
+            background: linear-gradient(90deg, #172554, #1e1b4b);
+            border-bottom: 1px solid rgba(59, 130, 246, 0.3);
+            color: #93c5fd;
+            padding: 8px 16px;
+            font-size: 0.83rem;
+            text-align: center;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 12px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #0d1322;
+            border-bottom: 1px solid var(--border-color);
+            scrollbar-width: none;
+        }
+
+        .nav-tabs::-webkit-scrollbar { display: none; }
+
+        .tab-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 9px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            white-space: nowrap;
+            font-size: 0.88rem;
+            font-weight: 500;
+            transition: all 0.25s ease;
+            flex-shrink: 0;
+        }
+
+        .tab-btn:hover {
+            border-color: var(--border-glow);
+            color: var(--text-main);
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 16px;
+        }
+
+        .controls-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 240px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: 12px;
+            outline: none;
+            font-size: 0.9rem;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+        }
+
+        /* أزرار الفلترة مع دمج الأعداد بداخلها مباشرة */
+        .filter-chips-bar {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 0;
+        }
+
+        @media (min-width: 768px) {
+            .filter-chips-bar {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+
+        .filter-chip-full {
+            grid-column: 1 / -1;
+        }
+
+        @media (min-width: 768px) {
+            .filter-chip-full {
+                grid-column: auto;
+            }
+        }
+
+        .filter-chip {
+            background: var(--card-bg);
+            color: #ffffff;
+            border: 1px solid var(--border-color);
+            padding: 12px 14px;
+            border-radius: 14px;
+            font-size: 0.95rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .filter-chip:hover {
+            border-color: var(--border-glow);
+            transform: translateY(-1px);
+        }
+
+        .filter-chip.active {
+            border-color: var(--primary);
+            background: #172554;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.3);
+        }
+
+        .chip-count {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .chip-all { font-size: 1rem; font-weight: bold; color: #ffffff; }
+        .chip-repair { color: #f59e0b; font-weight: bold; }
+        .chip-ready { color: #10b981; font-weight: bold; }
+        .chip-delivered { color: #3b82f6; font-weight: bold; }
+        .chip-returned { color: #ef4444; font-weight: bold; }
+
+        /* فصل جمالي وأنيق بين الفلاتر وقائمة العملاء */
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border-glow), transparent);
+            margin: 22px 0;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 11px 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover {
+            opacity: 0.92;
+            transform: translateY(-1px);
+        }
+
+        .btn-accent { background: var(--accent); color: #000; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3); }
+        .btn-danger { background: var(--danger); color: #fff; }
+        .btn-success { background: var(--success); color: #fff; }
+
+        .devices-grid { display: flex; flex-direction: column; gap: 12px; }
+
+        .device-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            overflow: hidden;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .device-card:hover {
+            border-color: var(--border-glow);
+        }
+
+        .device-summary-header {
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+            background: var(--card-bg);
+        }
+
+        .client-info-preview { display: flex; flex-direction: column; gap: 4px; }
+        .device-title { font-size: 1.05rem; font-weight: bold; color: var(--text-main); }
+        .device-subtitle { font-size: 0.85rem; color: var(--accent); font-weight: 500; }
+
+        .header-actions-preview { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+
+        .badge-status {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .badge-type {
+            font-size: 0.72rem;
+            padding: 4px 9px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .type-workshop { background: rgba(37, 99, 235, 0.2); color: #60a5fa; border: 1px solid rgba(37, 99, 235, 0.3); }
+        .type-home { background: rgba(236, 72, 153, 0.2); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.3); }
+
+        .badge-role {
+            background: rgba(37, 99, 235, 0.15);
+            color: #60a5fa;
+            font-size: 0.78rem;
+            padding: 3px 10px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .status-repair { background: rgba(245, 158, 11, 0.15); color: var(--accent); border: 1px solid rgba(245, 158, 11, 0.3); }
+        .status-ready { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
+        .status-delivered { background: rgba(37, 99, 235, 0.15); color: #60a5fa; border: 1px solid rgba(37, 99, 235, 0.3); }
+        .status-returned { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+        .arrow-icon {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            transition: transform 0.3s ease;
+        }
+
+        .device-details-body {
+            display: none;
+            padding: 16px 18px;
+            border-top: 1px solid var(--border-color);
+            background: rgba(11, 15, 25, 0.5);
+        }
+
+        .device-card.expanded .device-details-body { display: block; }
+        .device-card.expanded .arrow-icon { transform: rotate(180deg); color: var(--accent); }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            margin-bottom: 7px;
+            color: var(--text-muted);
+        }
+
+        .info-row span:last-child { color: var(--text-main); font-weight: 500; text-align: left; }
+
+        .financial-box {
+            background: var(--card-inner);
+            border: 1px dashed var(--border-color);
+            padding: 12px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .tech-orders-list { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+
+        .tech-order-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 14px 18px;
+        }
+
+        .tech-card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .tech-card-financial {
+            background: var(--card-inner);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal.active { display: flex; }
+
+        .modal-content {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 540px;
+            max-height: 92vh;
+            overflow-y: auto;
+            padding: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .form-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+
+        @media (min-width: 480px) { .form-grid { grid-template-columns: repeat(2, 1fr); } }
+
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group label { font-size: 0.82rem; color: var(--text-muted); font-weight: 500; }
+
+        .form-group input, .form-group select, .form-group textarea {
+            background: var(--card-inner);
+            border: 1px solid var(--border-color);
+            color: #fff;
+            padding: 10px 12px;
+            border-radius: 10px;
+            outline: none;
+            font-size: 0.9rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: var(--primary);
+        }
+
+        .form-group textarea { resize: vertical; min-height: 70px; }
+
+        .table-responsive { width: 100%; overflow-x: auto; }
+
+        .custom-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+            font-size: 0.85rem;
+        }
+
+        .custom-table th, .custom-table td {
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .custom-table th { background: #0d1322; color: var(--text-muted); font-weight: 600; }
+
+        #print-area { display: none; }
+
+        @media print {
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            body { background: #fff !important; color: #000 !important; }
+            #login-screen, #app-screen, .modal { display: none !important; }
+            #print-area {
+                display: block !important;
+                position: absolute;
+                left: 0; top: 0; width: 100%;
+                color: #000 !important;
+                background: #fff !important;
+                padding: 20px;
+                box-sizing: border-box;
+            }
+            .print-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+            .print-table th, .print-table td {
+                border: 1px solid #000;
+                padding: 8px;
+                text-align: right;
+                font-size: 12px;
+                color: #000 !important;
+            }
+            .print-table tr.in-progress-row { background-color: #fef08a !important; }
+            .print-table tr.returned-row { background-color: #fca5a5 !important; }
+            .print-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="login-screen">
+        <div class="login-card">
+            <h2>صيانة مصر</h2>
+            <p>تسجيل الدخول إلى النظام</p>
+            <form id="login-form">
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label>اسم المستخدم</label>
+                    <input type="text" id="login-username" required placeholder="أدخل اسم المستخدم">
+                </div>
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label>كلمة المرور</label>
+                    <input type="password" id="login-password" required placeholder="******">
+                </div>
+                <button type="submit" class="btn btn-accent" style="width: 100%; padding: 12px;">تسجيل الدخول</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="app-screen" style="display: none;">
+        <header>
+            <div class="header-container">
+                <h3 style="color: var(--accent); font-size: 1.2rem; font-weight: 700;">صيانة مصر</h3>
+                <div>
+                    <span class="user-badge" id="current-user-display">مدير الصيانة</span>
+                    <button class="btn btn-danger" style="padding: 6px 12px; font-size: 0.8rem;" onclick="logout()">خروج</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- شريط التنبيهات العاجل -->
+        <div class="notice-ticker" id="notice-ticker">
+            <span>📢 نظام صيانة مصر يعمل بكفاءة. جاري تحديث الأوردرات الفورية وإشعارات الحسابات.</span>
+        </div>
+
+        <div class="nav-tabs" id="main-nav-tabs">
+            <button class="tab-btn active" id="tab-dashboard" onclick="switchTab('dashboard', this)">القائمة الرئيسية</button>
+            <button class="tab-btn" id="tab-workshop" onclick="switchTab('workshop', this)">قائمة الورشة</button>
+            <button class="tab-btn" id="tab-followup" onclick="switchTab('followup', this)">قسم المتابعة</button>
+            <button class="tab-btn" id="tab-accounts" onclick="switchTab('accounts', this)">قسم الحسابات</button>
+            <button class="tab-btn" id="tab-technicians" onclick="switchTab('technicians', this)">حسابات الفنيين</button>
+            <button class="tab-btn" id="tab-deliveries" onclick="switchTab('deliveries', this)">التسليمات</button>
+            <button class="tab-btn" id="tab-users-mgr" onclick="switchTab('users-mgr', this)">إدارة الموظفين</button>
+        </div>
+
+        <div class="main-container">
+            <div class="controls-bar" id="controls-area">
+                <input type="text" id="search-box" class="search-input" placeholder="بحث باسم العميل، الموديل، الهاتف، أو الفني..." oninput="renderDevices()">
+                <button class="btn btn-accent" id="add-device-btn" onclick="openDeviceModal()">+ إضافة أوردر جديد</button>
+            </div>
+
+            <!-- أزرار الفلترة المدمج بداخلها الأعداد التلقائية والمحدثة أوتوماتيك -->
+            <div class="filter-chips-bar" id="filter-chips-container">
+                <div class="filter-chip filter-chip-full active chip-all" onclick="setFilterStatus('all', this)">
+                    <span>الكل</span>
+                    <span class="chip-count" id="count-all">0</span>
+                </div>
+                <div class="filter-chip chip-repair" onclick="setFilterStatus('قيد الصيانة', this)">
+                    <span>قيد الصيانة</span>
+                    <span class="chip-count" id="count-repair">0</span>
+                </div>
+                <div class="filter-chip chip-ready" onclick="setFilterStatus('جاهز للتسليم', this)">
+                    <span>جاهز للتسليم</span>
+                    <span class="chip-count" id="count-ready">0</span>
+                </div>
+                <div class="filter-chip chip-delivered" onclick="setFilterStatus('تم التسليم', this)">
+                    <span>تم التسليم</span>
+                    <span class="chip-count" id="count-delivered">0</span>
+                </div>
+                <div class="filter-chip chip-returned" onclick="setFilterStatus('مرتجع بالورشة', this)">
+                    <span>مرتجع ورشة</span>
+                    <span class="chip-count" id="count-returned">0</span>
+                </div>
+            </div>
+
+            <!-- فصل جمالي وأنيق بين الفلاتر وقائمة الأوردرات -->
+            <div class="section-divider"></div>
+
+            <div class="devices-grid" id="devices-container"></div>
+
+            <div id="technicians-view" style="display: none;">
+                <div style="background: var(--card-bg); border: 1px solid var(--border-color); padding: 16px; border-radius: 16px; margin-bottom: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                    <div class="form-grid" style="margin-bottom: 12px;">
+                        <div class="form-group">
+                            <label style="color: var(--accent); font-weight: bold;">اختر الفني:</label>
+                            <select id="tech-select-filter" onchange="renderTechReport()" style="padding: 10px; background: var(--card-inner); color: #fff; border: 1px solid var(--border-color); border-radius: 10px;">
+                                <option value="">-- اختر الفني --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label style="color: var(--text-muted);">من تاريخ:</label>
+                            <input type="date" id="tech-date-from" onchange="renderTechReport()" style="padding: 9px; background: var(--card-inner); color: #fff; border: 1px solid var(--border-color); border-radius: 10px;">
+                        </div>
+                        <div class="form-group">
+                            <label style="color: var(--text-muted);">إلى تاريخ:</label>
+                            <input type="date" id="tech-date-to" onchange="renderTechReport()" style="padding: 9px; background: var(--card-inner); color: #fff; border: 1px solid var(--border-color); border-radius: 10px;">
+                        </div>
+                    </div>
+                    <button class="btn btn-accent" id="btn-print-tech" style="width: 100%; display: none; padding: 11px;" onclick="printTechReport()">🖨 طباعة تقرير حسابات الفني للفترة الحالية</button>
+                </div>
+
+                <div class="stats-grid" id="tech-stats-area" style="display: none; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px;">
+                    <div class="stat-card" style="background: var(--card-bg); border: 1px solid var(--border-color); padding: 14px; border-radius: 12px; text-align: center;">
+                        <h4 style="color: var(--text-muted); font-size: 0.82rem; margin-bottom: 4px;">أوردرات الفني بالمدة</h4>
+                        <div class="val" id="tech-st-count" style="font-size: 1.3rem; font-weight: bold;">0</div>
+                    </div>
+                    <div class="stat-card" style="background: var(--card-bg); border: 1px solid var(--border-color); padding: 14px; border-radius: 12px; text-align: center;">
+                        <h4 style="color: var(--text-muted); font-size: 0.82rem; margin-bottom: 4px;">إجمالي المستحق بالفترة</h4>
+                        <div class="val" style="color: var(--success); font-size: 1.3rem; font-weight: bold;" id="tech-st-commission">0 ج.م</div>
+                    </div>
+                </div>
+
+                <div id="tech-orders-container" class="tech-orders-list">
+                    <div style="text-align: center; color: var(--text-muted); padding: 30px;">يرجى اختيار فني من القائمة بالأعلى لعرض تقريره.</div>
+                </div>
+            </div>
+
+            <div id="users-manager-view" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                    <h4 style="font-size: 1rem; font-weight: bold;">إدارة حسابات الموظفين وصلاحيات الوصول</h4>
+                    <button class="btn btn-success" onclick="openUserModal()">+ إضافة موظف</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>اسم المستخدم</th>
+                                <th>الصلاحية</th>
+                                <th>كلمة المرور</th>
+                                <th>تحكم</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="print-area"></div>
+
+    <div class="modal" id="device-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 id="modal-title" style="font-size: 1rem; font-weight: bold;">إضافة أوردر جديد</h4>
+                <button onclick="closeDeviceModal()" style="background:none; border:none; color:#fff; font-size:1.3rem; cursor:pointer;">✕</button>
+            </div>
+            <form id="device-form">
+                <input type="hidden" id="dev-id">
+                <input type="hidden" id="dev-created-at">
+                <input type="hidden" id="dev-iso-date">
+                
+                <div class="form-group" id="group-service-type" style="margin-bottom: 12px;">
+                    <label style="color: var(--accent); font-weight: bold;">مكان الصيانة (نوع الخدمة) *</label>
+                    <select id="dev-service-type" style="border: 1px solid var(--accent);">
+                        <option value="صيانة بالورشة">صيانة بالورشة</option>
+                        <option value="إصلاح منزلي">إصلاح منزلي (عند العميل)</option>
+                    </select>
+                </div>
+
+                <div id="section-workshop-inputs">
+                    <h5 style="color: var(--accent); margin-bottom: 10px; font-size: 0.9rem;">بيانات العميل والأوردر (الأساسية)</h5>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>اسم العميل *</label>
+                            <input type="text" id="dev-client" required placeholder="اسم العميل الكامل">
+                        </div>
+                        <div class="form-group">
+                            <label>المنطقة *</label>
+                            <input type="text" id="dev-area" required placeholder="مثال: سيدي بشر">
+                        </div>
+                        <div class="form-group">
+                            <label>نوع / موديل الجهاز *</label>
+                            <input type="text" id="dev-model" required placeholder="مثال: غسالة فريش توب">
+                        </div>
+                        <div class="form-group">
+                            <label>رقم الهاتف</label>
+                            <input type="text" id="dev-phone" placeholder="01xxxxxxxxx">
+                        </div>
+                        <div class="form-group">
+                            <label>العطل / الشكوى *</label>
+                            <input type="text" id="dev-fault" required placeholder="مثال: جيربوكس / تنقيط مياه">
+                        </div>
+                        <div class="form-group">
+                            <label>اسم الفني (الساحب / المباشر) *</label>
+                            <input type="text" id="dev-tech-pull" required placeholder="اسم الفني المسؤول">
+                        </div>
+                        <div class="form-group">
+                            <label>حالة الأوردر</label>
+                            <select id="dev-status" onchange="calcNetProfit()">
+                                <option value="قيد الصيانة">قيد الصيانة</option>
+                                <option value="مرتجع بالورشة">مرتجع بالورشة</option>
+                                <option value="جاهز للتسليم">جاهز للتسليم / تم الإصلاح</option>
+                                <option value="تم التسليم">تم التسليم والتحصيل</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>رقم الكارت / السيريال (اختياري)</label>
+                            <input type="text" id="dev-card-num" placeholder="يولد تلقائياً إن ترك فارغاً">
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1;" id="group-notes">
+                            <label>ملاحظات (إن وجدت)</label>
+                            <textarea id="dev-notes" placeholder="أدخل أي ملاحظات خاصة بالأوردر..."></textarea>
+                        </div>
+                    </div>
+
+                    <h5 style="color: var(--primary); margin: 14px 0 10px 0; font-size: 0.9rem; border-top: 1px dashed var(--border-color); padding-top: 10px;">تحديثات الإصلاح والتكاليف الفنية</h5>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>اسم فني الإصلاح المكلف</label>
+                            <input type="text" id="dev-tech-repair" placeholder="اسم الفني المسؤول عن الإصلاح">
+                        </div>
+                        <div class="form-group">
+                            <label>قطع الغيار المصروفة (الوصف)</label>
+                            <input type="text" id="dev-parts-used" placeholder="مثال: طلمبة . طقم مساعدين . صمام">
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label style="color: var(--accent); font-weight: bold;">سعر / تكلفة قطع الغيار المصروفة (ج.م)</label>
+                            <input type="number" id="fin-parts-workshop" value="0" oninput="syncPartsCostFromWorkshop()" placeholder="أدخل تكلفة قطع الغيار">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="section-financial-inputs" style="border-top: 1px solid var(--border-color); margin-top: 14px; padding-top: 12px;">
+                    <h5 style="color: var(--success); margin-bottom: 10px; font-size: 0.9rem;">قسم الحسابات والمتابعة المالية</h5>
+                    <div class="form-grid">
+                        <div class="form-group" id="group-fin-total">
+                            <label>إجمالي الفاتورة (ج.م)</label>
+                            <input type="number" id="fin-total" value="0" oninput="calcNetProfit()">
+                        </div>
+                        <div class="form-group" id="group-fin-deposit">
+                            <label>العربون المدفوع (ج.م)</label>
+                            <input type="number" id="fin-deposit" value="0" oninput="calcNetProfit()">
+                        </div>
+                        <div class="form-group" id="group-fin-parts">
+                            <label>تكلفة قطع الغيار المصروفة (ج.م)</label>
+                            <input type="number" id="fin-parts" value="0" oninput="calcNetProfit()" placeholder="0">
+                        </div>
+                        <div class="form-group" id="group-fin-transport">
+                            <label>حساب النقل / الانتقالات (ج.م)</label>
+                            <input type="number" id="fin-transport" value="0" oninput="calcNetProfit()">
+                        </div>
+                        <div class="form-group" id="group-fin-percent">
+                            <label>نسبة الفني (%)</label>
+                            <input type="number" id="fin-tech-percent" value="0" oninput="calcNetProfit()" placeholder="مثال: 10">
+                        </div>
+                        <div class="form-group" id="group-fin-fee-val">
+                            <label>نسبة الفني المستحقة (تتفعّل عند التسليم)</label>
+                            <input type="number" id="fin-tech-fee-val" value="0" readonly style="color: #60a5fa; font-weight:bold;">
+                        </div>
+                        <div class="form-group" id="group-fin-remaining">
+                            <label>المتبقي على العميل (للتحصيل)</label>
+                            <input type="number" id="fin-remaining" value="0" readonly style="color: var(--accent); font-weight:bold;">
+                        </div>
+                        <div class="form-group" id="group-fin-net" style="grid-column: 1 / -1;">
+                            <label>صافي ربح الشركة من الأوردر (ج.م)</label>
+                            <input type="number" id="fin-net" value="0" readonly style="color: var(--success); font-weight:bold; font-size: 1rem;">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-accent" style="width: 100%; margin-top: 16px; padding: 12px;">حفظ البيانات</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="user-modal">
+        <div class="modal-content" style="max-width: 380px;">
+            <div class="modal-header">
+                <h4 style="font-size: 0.95rem; font-weight: bold;">إضافة / تعديل موظف</h4>
+                <button onclick="closeUserModal()" style="background:none; border:none; color:#fff; font-size:1.3rem; cursor:pointer;">✕</button>
+            </div>
+            <form id="user-form">
+                <input type="hidden" id="user-edit-id">
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label>اسم المستخدم</label>
+                    <input type="text" id="usr-username" required placeholder="اسم المستخدم">
+                </div>
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label>كلمة المرور</label>
+                    <input type="text" id="usr-password" required placeholder="كلمة المرور">
+                </div>
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label>صلاحية الوصول</label>
+                    <select id="usr-role">
+                        <option value="admin">مدير الصيانة (وصول كامل)</option>
+                        <option value="workshop">مسئول الورشة</option>
+                        <option value="followup">مسئول المتابعة والإصلاح المنزلي</option>
+                        <option value="accountant">مسئول الحسابات</option>
+                        <option value="delivery">مسئول التسليمات</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-success" style="width: 100%; padding: 11px;">حفظ الحساب</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script>
+        /** @type {any} */
+        var firebase = window.firebase;
+        var firebaseConfig = {
+            databaseURL: "https://syint-msr-default-rtdb.europe-west1.firebasedatabase.app"
+        };
+        firebase.initializeApp(firebaseConfig);
+        var db = firebase.database();
+
+        var currentUser = null;
+        var devicesData = {};
+        var usersData = {};
+        var activeTab = 'dashboard';
+        var currentFilteredTechOrders = [];
+        var currentStatusFilter = 'all';
+
+        /** @param {any} text */
+        function normalizeArabicText(text) {
+            if (!text) return '';
+            return text
+                .toString()
+                .trim()
+                .replace(/[أإآ]/g, 'ا')
+                .replace(/ة/g, 'ه')
+                .replace(/ى/g, 'ي')
+                .toLowerCase();
+        }
+
+        /** @param {any} str */
+        function convertArabicDigitsToEnglish(str) {
+            if (!str) return '';
+            return str.toString().replace(/[٠-٩]/g, function(/** @type {string} */ d) {
+                return "٠١٢٣٤٥٦٧٨٩".indexOf(d).toString();
+            });
+        }
+
+        /** @param {any} dev */
+        function getDeviceISODate(dev) {
+            if (dev.isoDate && dev.isoDate.match(/^\d{4}-\d{2}-\d{2}$/)) return dev.isoDate;
+            if (dev.rawDate && dev.rawDate.match(/^\d{4}-\d{2}-\d{2}$/)) return dev.rawDate;
+
+            var source = dev.createdAt || dev.rawDate || '';
+            var engSource = convertArabicDigitsToEnglish(source);
+
+            var matchISO = engSource.match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+            if (matchISO) {
+                return matchISO[1] + '-' + matchISO[2].padStart(2, '0') + '-' + matchISO[3].padStart(2, '0');
+            }
+
+            var monthsMap = {
+                'يناير': '01', 'فبراير': '02', 'مارس': '03', 'أبريل': '04', 'ابريل': '04',
+                'مايو': '05', 'يونيو': '06', 'يوليو': '07', 'أغسطس': '08', 'اغسطس': '08',
+                'سبتمبر': '09', 'أكتوبر': '10', 'اكتوبر': '10', 'نوفمبر': '11', 'ديسمبر': '12'
+            };
+
+            for (var mName in monthsMap) {
+                if (source.indexOf(mName) !== -1) {
+                    var dayMatch = engSource.match(/(\d{1,2})/);
+                    var yearMatch = engSource.match(/(\d{4})/);
+                    if (dayMatch && yearMatch) {
+                        var d = dayMatch[1].padStart(2, '0');
+                        var y = yearMatch[1];
+                        var m = monthsMap[mName];
+                        return y + '-' + m + '-' + d;
+                    }
+                }
+            }
+
+            return '';
+        }
+
+        window.onload = function() {
+            checkSavedSession();
+            initDefaultAdmin();
+        };
+
+        function initDefaultAdmin() {
+            db.ref('users/admin').once('value', function(/** @type {any} */ snapshot) {
+                if (!snapshot.exists()) {
+                    db.ref('users/admin').set({
+                        username: 'admin',
+                        password: '1234',
+                        role: 'admin'
+                    });
+                }
+            });
+        }
+
+        document.getElementById('login-form').onsubmit = function(e) {
+            e.preventDefault();
+            var u = /** @type {HTMLInputElement} */ (document.getElementById('login-username')).value.trim();
+            var p = /** @type {HTMLInputElement} */ (document.getElementById('login-password')).value.trim();
+
+            db.ref('users').once('value', function(/** @type {any} */ snapshot) {
+                var users = snapshot.val() || {};
+                var found = null;
+                for (var id in users) {
+                    if (users[id].username === u && users[id].password === p) {
+                        found = users[id];
+                        found.id = id;
+                        break;
+                    }
+                }
+
+                if (found) {
+                    currentUser = found;
+                    localStorage.setItem('syint_user', JSON.stringify(found));
+                    setupUserInterface();
+                } else {
+                    alert('اسم المستخدم أو كلمة المرور غير صحيحة!');
+                }
+            });
+        };
+
+        function checkSavedSession() {
+            var saved = localStorage.getItem('syint_user');
+            if (saved) {
+                currentUser = JSON.parse(saved);
+                setupUserInterface();
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('syint_user');
+            location.reload();
+        }
+
+        function setupUserInterface() {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('app-screen').style.display = 'block';
+            document.getElementById('current-user-display').innerText = currentUser.username + ' (' + getRoleLabel(currentUser.role) + ')';
+
+            var addBtn = document.getElementById('add-device-btn');
+
+            document.getElementById('tab-dashboard').style.display = 'none';
+            document.getElementById('tab-workshop').style.display = 'none';
+            document.getElementById('tab-followup').style.display = 'none';
+            document.getElementById('tab-accounts').style.display = 'none';
+            document.getElementById('tab-technicians').style.display = 'none';
+            document.getElementById('tab-deliveries').style.display = 'none';
+            document.getElementById('tab-users-mgr').style.display = 'none';
+
+            if (currentUser.role === 'admin') {
+                document.getElementById('tab-dashboard').style.display = 'inline-block';
+                document.getElementById('tab-workshop').style.display = 'inline-block';
+                document.getElementById('tab-followup').style.display = 'inline-block';
+                document.getElementById('tab-accounts').style.display = 'inline-block';
+                document.getElementById('tab-technicians').style.display = 'inline-block';
+                document.getElementById('tab-deliveries').style.display = 'inline-block';
+                document.getElementById('tab-users-mgr').style.display = 'inline-block';
+                addBtn.style.display = 'inline-flex';
+                switchTab('dashboard', document.getElementById('tab-dashboard'));
+            } 
+            else if (currentUser.role === 'workshop') {
+                document.getElementById('tab-workshop').style.display = 'inline-block';
+                addBtn.style.display = 'inline-flex';
+                switchTab('workshop', document.getElementById('tab-workshop'));
+            } 
+            else if (currentUser.role === 'followup') {
+                document.getElementById('tab-followup').style.display = 'inline-block';
+                addBtn.style.display = 'inline-flex';
+                switchTab('followup', document.getElementById('tab-followup'));
+            }
+            else if (currentUser.role === 'accountant') {
+                document.getElementById('tab-accounts').style.display = 'inline-block';
+                document.getElementById('tab-technicians').style.display = 'inline-block';
+                addBtn.style.display = 'none';
+                switchTab('accounts', document.getElementById('tab-accounts'));
+            } 
+            else if (currentUser.role === 'delivery') {
+                document.getElementById('tab-deliveries').style.display = 'inline-block';
+                addBtn.style.display = 'none';
+                switchTab('deliveries', document.getElementById('tab-deliveries'));
+            }
+
+            listenToData();
+            listenToUsers();
+        }
+
+        /** @param {any} role */
+        function getRoleLabel(role) {
+            var labels = {
+                'admin': 'مدير الصيانة',
+                'workshop': 'مسئول الورشة',
+                'followup': 'مسئول المتابعة والإصلاح المنزلي',
+                'accountant': 'مسئول الحسابات',
+                'delivery': 'مسئول التسليمات'
+            };
+            return labels[role] || role;
+        }
+
+        /** 
+         * @param {any} tab 
+         * @param {any} btnElement 
+         */
+        function switchTab(tab, btnElement) {
+            activeTab = tab;
+            var buttons = document.querySelectorAll('.tab-btn');
+            for (var i = 0; i < buttons.length; i++) {
+                buttons[i].classList.remove('active');
+            }
+            if (btnElement && btnElement.classList) {
+                btnElement.classList.add('active');
+            }
+
+            if (tab === 'users-mgr') {
+                document.getElementById('devices-container').style.display = 'none';
+                document.getElementById('controls-area').style.display = 'none';
+                document.getElementById('filter-chips-container').style.display = 'none';
+                document.querySelector('.section-divider').style.display = 'none';
+                document.getElementById('technicians-view').style.display = 'none';
+                document.getElementById('users-manager-view').style.display = 'block';
+            } else if (tab === 'technicians') {
+                document.getElementById('devices-container').style.display = 'none';
+                document.getElementById('controls-area').style.display = 'none';
+                document.getElementById('filter-chips-container').style.display = 'none';
+                document.querySelector('.section-divider').style.display = 'none';
+                document.getElementById('users-manager-view').style.display = 'none';
+                document.getElementById('technicians-view').style.display = 'block';
+                populateTechDropdown();
+            } else {
+                document.getElementById('devices-container').style.display = 'flex';
+                document.getElementById('controls-area').style.display = 'flex';
+                document.getElementById('filter-chips-container').style.display = 'grid';
+                document.querySelector('.section-divider').style.display = 'block';
+                document.getElementById('users-manager-view').style.display = 'none';
+                document.getElementById('technicians-view').style.display = 'none';
+                renderDevices();
+            }
+        }
+
+        function listenToData() {
+            db.ref('devices').on('value', function(/** @type {any} */ snapshot) {
+                devicesData = snapshot.val() || {};
+                updateFilterCounts();
+                renderDevices();
+                populateTechDropdown();
+            });
+        }
+
+        function updateFilterCounts() {
+            var cAll = 0, cRepair = 0, cReady = 0, cDelivered = 0, cReturned = 0;
+
+            for (var id in devicesData) {
+                var dev = devicesData[id];
+                if ((currentUser.role === 'delivery' || activeTab === 'deliveries') && dev.status !== 'جاهز للتسليم') continue;
+                if (currentUser.role === 'workshop' && dev.serviceType === 'إصلاح منزلي') continue;
+
+                cAll++;
+                if (dev.status === 'قيد الصيانة') cRepair++;
+                else if (dev.status === 'جاهز للتسليم') cReady++;
+                else if (dev.status === 'تم التسليم') cDelivered++;
+                else if (dev.status === 'مرتجع بالورشة') cReturned++;
+            }
+
+            document.getElementById('count-all').innerText = cAll.toString();
+            document.getElementById('count-repair').innerText = cRepair.toString();
+            document.getElementById('count-ready').innerText = cReady.toString();
+            document.getElementById('count-delivered').innerText = cDelivered.toString();
+            document.getElementById('count-returned').innerText = cReturned.toString();
+        }
+
+        function listenToUsers() {
+            db.ref('users').on('value', function(/** @type {any} */ snapshot) {
+                usersData = snapshot.val() || {};
+                renderUsersTable();
+            });
+        }
+
+        function syncPartsCostFromWorkshop() {
+            var workshopVal = parseFloat(/** @type {HTMLInputElement} */ (document.getElementById('fin-parts-workshop')).value) || 0;
+            /** @type {HTMLInputElement} */ (document.getElementById('fin-parts')).value = workshopVal.toString();
+            calcNetProfit();
+        }
+
+        function calcNetProfit() {
+            var total = parseFloat(/** @type {HTMLInputElement} */ (document.getElementById('fin-total')).value) || 0;
+            var deposit = parseFloat(/** @type {HTMLInputElement} */ (document.getElementById('fin-deposit')).value) || 0;
+            var parts = parseFloat(/** @type {HTMLInputElement} */ (document.getElementById('fin-parts')).value) || 0;
+            var transport = parseFloat(/** @type {HTMLInputElement} */ (document.getElementById('fin-transport')).value) || 0;
+            var techPercent = parseFloat(/** @type {HTMLInputElement} */ (document.getElementById('fin-tech-percent')).value) || 0;
+            var status = /** @type {HTMLSelectElement} */ (document.getElementById('dev-status')).value;
+
+            var netBeforeTech = total - (parts + transport);
+            
+            var techFeeVal = 0;
+            if (status === 'تم التسليم' && netBeforeTech > 0 && techPercent > 0) {
+                techFeeVal = Math.round((netBeforeTech * techPercent) / 100);
+            }
+
+            var companyNetProfit = Math.round(total - (parts + transport + techFeeVal));
+            var remaining = total - deposit;
+
+            /** @type {HTMLInputElement} */ (document.getElementById('fin-tech-fee-val')).value = techFeeVal.toString();
+            /** @type {HTMLInputElement} */ (document.getElementById('fin-remaining')).value = remaining.toString();
+            /** @type {HTMLInputElement} */ (document.getElementById('fin-net')).value = companyNetProfit.toString();
+        }
+
+        /** 
+         * @param {string} status 
+         * @param {any} btnElement 
+         */
+        function setFilterStatus(status, btnElement) {
+            currentStatusFilter = status;
+            var chips = document.querySelectorAll('.filter-chip');
+            for (var i = 0; i < chips.length; i++) {
+                chips[i].classList.remove('active');
+            }
+            if (btnElement) {
+                btnElement.classList.add('active');
+            }
+            renderDevices();
+        }
+
+        function renderDevices() {
+            var container = document.getElementById('devices-container');
+            container.innerHTML = '';
+            var rawSearch = /** @type {HTMLInputElement} */ (document.getElementById('search-box')).value;
+            var search = normalizeArabicText(rawSearch);
+
+            for (var id in devicesData) {
+                var dev = devicesData[id];
+
+                if ((currentUser.role === 'delivery' || activeTab === 'deliveries') && dev.status !== 'جاهز للتسليم') {
+                    continue;
+                }
+
+                if (currentUser.role === 'workshop' && dev.serviceType === 'إصلاح منزلي') {
+                    continue;
+                }
+
+                if (currentStatusFilter !== 'all' && dev.status !== currentStatusFilter) {
+                    continue;
+                }
+
+                var matchSearch = normalizeArabicText(dev.client).includes(search) ||
+                                    normalizeArabicText(dev.model).includes(search) ||
+                                    normalizeArabicText(dev.phone).includes(search) ||
+                                    normalizeArabicText(dev.techPull).includes(search) ||
+                                    normalizeArabicText(dev.techRepair).includes(search) ||
+                                    normalizeArabicText(dev.cardNum).includes(search);
+                if (!matchSearch) continue;
+
+                var card = document.createElement('div');
+                card.className = 'device-card';
+                card.id = 'device-card-' + id;
+
+                var statusClass = 'status-repair';
+                if (dev.status === 'جاهز للتسليم') statusClass = 'status-ready';
+                if (dev.status === 'تم التسليم') statusClass = 'status-delivered';
+                if (dev.status === 'مرتجع بالورشة') statusClass = 'status-returned';
+
+                var serviceType = dev.serviceType || 'صيانة بالورشة';
+                var typeClass = serviceType === 'إصلاح منزلي' ? 'type-home' : 'type-workshop';
+
+                var financialHTML = '';
+                
+                if (currentUser.role === 'admin' || currentUser.role === 'accountant' || activeTab === 'accounts') {
+                    financialHTML = '<div class="financial-box">' +
+                        '<div class="info-row"><span>الفاتورة:</span> <span>' + (dev.total || 0) + ' ج.م</span></div>' +
+                        '<div class="info-row"><span>العربون:</span> <span>' + (dev.deposit || 0) + ' ج.م</span></div>' +
+                        '<div class="info-row"><span>المتبقي للتحصيل:</span> <span style="color:var(--accent); font-weight:bold;">' + (dev.remaining || 0) + ' ج.م</span></div>' +
+                        '<div class="info-row"><span>تكلفة قطع الغيار:</span> <span>' + (dev.parts || 0) + ' ج.م</span></div>' +
+                        '<div class="info-row"><span>حساب النقل/الانتقالات:</span> <span>' + (dev.transport || 0) + ' ج.م</span></div>' +
+                        '<div class="info-row"><span>نسبة الفني (' + (dev.techPercent || 0) + '%):</span> <span style="color:' + (dev.status === 'تم التسليم' ? '#60a5fa' : 'var(--text-muted)') + ';">' + (dev.status === 'تم التسليم' ? (dev.techFeeVal || 0) + ' ج.م' : 'معلقة لحين التسليم') + '</span></div>' +
+                        '<div class="info-row" style="border-top: 1px dashed var(--border-color); padding-top: 6px; margin-top: 6px;">' +
+                            '<span>صافي ربح الشركة:</span> ' +
+                            '<span style="color:var(--success); font-weight:bold;">' + (dev.netProfit || 0) + ' ج.م</span>' +
+                        '</div>' +
+                    '</div>';
+                }
+                
+                if (currentUser.role === 'delivery' || activeTab === 'deliveries' || currentUser.role === 'workshop' || currentUser.role === 'followup' || activeTab === 'followup') {
+                    financialHTML = '<div class="financial-box">' +
+                        '<div class="info-row"><span>تكلفة قطع الغيار المصروفة:</span> <span style="color:var(--accent); font-weight:bold;">' + (dev.parts || 0) + ' ج.م</span></div>' +
+                        '<div class="info-row"><span>إجمالي الفاتورة:</span> <span>' + (dev.total || 0) + ' ج.م</span></div>' +
+                        '<div class="info-row"><span>العربون المدفوع:</span> <span>' + (dev.deposit || 0) + ' ج.م</span></div>' +
+                        '<div class="info-row" style="border-top: 1px dashed var(--border-color); padding-top: 6px; margin-top: 6px;">' +
+                            '<span>المتبقي للتحصيل:</span> ' +
+                            '<span style="color:var(--accent); font-weight:bold; font-size: 0.9rem;">' + (dev.remaining || 0) + ' ج.م</span>' +
+                        '</div>' +
+                    '</div>';
+                }
+
+                var notesHTML = dev.notes ? '<div class="info-row"><span>ملاحظات:</span> <span style="color:var(--accent);">' + dev.notes + '</span></div>' : '';
+
+                card.innerHTML = '<div class="device-summary-header" onclick="window.toggleCard(\'' + id + '\')">' +
+                    '<div class="client-info-preview">' +
+                        '<div class="device-title">' + dev.client + '</div>' +
+                        '<div class="device-subtitle">' + dev.model + '</div>' +
+                    '</div>' +
+                    '<div class="header-actions-preview">' +
+                        '<span class="badge-type ' + typeClass + '">' + serviceType + '</span>' +
+                        '<span class="badge-status ' + statusClass + '">' + dev.status + '</span>' +
+                        '<span class="arrow-icon">▼</span>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="device-details-body">' +
+                    '<div class="info-row"><span>نوع الخدمة:</span> <span style="color: var(--accent); font-weight:bold;">' + serviceType + '</span></div>' +
+                    '<div class="info-row"><span>تاريخ الدخول / الطلب:</span> <span>' + (dev.createdAt || '-') + '</span></div>' +
+                    '<div class="info-row"><span>المنطقة:</span> <span>' + (dev.area || 'غير محدد') + '</span></div>' +
+                    '<div class="info-row"><span>العطل:</span> <span>' + (dev.fault || '-') + '</span></div>' +
+                    '<div class="info-row"><span>الهاتف:</span> <span style="color:var(--accent); font-weight:bold;">' + (dev.phone || '-') + '</span></div>' +
+                    '<div class="info-row"><span>الفني المسؤول / الساحب:</span> <span>' + (dev.techPull || '-') + '</span></div>' +
+                    '<div class="info-row"><span>فني الإصلاح:</span> <span>' + (dev.techRepair || 'لم يُحدد') + '</span></div>' +
+                    '<div class="info-row"><span>قطع الغيار التي تم عملها:</span> <span style="color:var(--accent);">' + (dev.partsUsed || 'لا يوجد') + '</span></div>' +
+                    notesHTML +
+                    financialHTML +
+                    '<div style="display:flex; gap:8px; margin-top:14px;">' +
+                        (currentUser.role !== 'delivery' ? '<button class="btn btn-accent" style="flex:1; padding:8px; font-size:0.82rem;" onclick="window.editDevice(\'' + id + '\')">تعديل البيانات</button>' : '') +
+                        (currentUser.role === 'admin' ? '<button class="btn btn-danger" style="padding:8px; font-size:0.82rem;" onclick="window.deleteDevice(\'' + id + '\')">حذف</button>' : '') +
+                    '</div>' +
+                '</div>';
+                container.appendChild(card);
+            }
+        }
+
+        /** @param {string} id */
+        window.toggleCard = function(id) {
+            var card = document.getElementById('device-card-' + id);
+            if (card) {
+                card.classList.toggle('expanded');
+            }
+        };
+
+        function populateTechDropdown() {
+            var select = /** @type {HTMLSelectElement} */ (document.getElementById('tech-select-filter'));
+            if (!select) return;
+            var currentSelected = select.value;
+            
+            var techList = /** @type {Record<string, string>} */ ({});
+
+            for (var id in devicesData) {
+                var pull = (devicesData[id].techPull || '').toString().trim();
+                var repair = (devicesData[id].techRepair || '').toString().trim();
+
+                if (pull) {
+                    var normP = normalizeArabicText(pull);
+                    if (normP && !techList[normP]) techList[normP] = pull;
+                }
+                if (repair) {
+                    var normR = normalizeArabicText(repair);
+                    if (normR && !techList[normR]) techList[normR] = repair;
+                }
+            }
+
+            select.innerHTML = '<option value="">-- اختر الفني --</option>';
+            for (var key in techList) {
+                var option = document.createElement('option');
+                option.value = key;
+                option.innerText = techList[key];
+                select.appendChild(option);
+            }
+            
+            select.value = currentSelected;
+            if (currentSelected) {
+                renderTechReport();
+            }
+        }
+
+        function renderTechReport() {
+            var select = /** @type {HTMLSelectElement} */ (document.getElementById('tech-select-filter'));
+            var selectedNormTech = select ? select.value : '';
+            var container = document.getElementById('tech-orders-container');
+            var statsArea = document.getElementById('tech-stats-area');
+            var btnPrint = document.getElementById('btn-print-tech');
+
+            var dateFrom = /** @type {HTMLInputElement} */ (document.getElementById('tech-date-from')).value;
+            var dateTo = /** @type {HTMLInputElement} */ (document.getElementById('tech-date-to')).value;
+
+            if (!selectedNormTech) {
+                container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 30px;">يرجى اختيار فني من القائمة بالأعلى لعرض تقريره.</div>';
+                statsArea.style.display = 'none';
+                btnPrint.style.display = 'none';
+                currentFilteredTechOrders = [];
+                return;
+            }
+
+            var count = 0;
+            var totalCommission = 0;
+            container.innerHTML = '';
+            currentFilteredTechOrders = [];
+
+            for (var id in devicesData) {
+                var dev = devicesData[id];
+                var pullNorm = normalizeArabicText(dev.techPull);
+                var repairNorm = normalizeArabicText(dev.techRepair);
+
+                var isPull = pullNorm === selectedNormTech;
+                var isRepair = repairNorm === selectedNormTech;
+
+                if (isPull || isRepair) {
+                    var orderDateISO = getDeviceISODate(dev);
+                    
+                    if (orderDateISO) {
+                        if (dateFrom && orderDateISO < dateFrom) continue;
+                        if (dateTo && orderDateISO > dateTo) continue;
+                    }
+
+                    count++;
+                    var roleText = (isPull && isRepair) ? 'ساحب وإصلاح' : (isPull ? 'فني ساحب' : 'فني إصلاح');
+                    
+                    var isDelivered = dev.status === 'تم التسليم';
+                    var commission = (isPull && isDelivered) ? (parseFloat(dev.techFeeVal) || 0) : 0;
+                    totalCommission += commission;
+
+                    var copyDev = Object.assign({}, dev);
+                    copyDev.calculatedCommission = commission;
+                    copyDev.roleText = roleText;
+                    currentFilteredTechOrders.push(copyDev);
+
+                    var statusClass = 'status-repair';
+                    if (dev.status === 'جاهز للتسليم') statusClass = 'status-ready';
+                    if (dev.status === 'تم التسليم') statusClass = 'status-delivered';
+                    if (dev.status === 'مرتجع بالورشة') statusClass = 'status-returned';
+
+                    var card = document.createElement('div');
+                    card.className = 'tech-order-card';
+                    card.innerHTML = '<div class="tech-card-top">' +
+                        '<div>' +
+                            '<div style="font-weight: bold; font-size: 0.95rem; color: var(--text-main);">' + dev.client + '</div>' +
+                            '<div style="font-size: 0.82rem; color: var(--accent); margin-top: 2px;">' + dev.model + ' (' + (dev.serviceType || 'صيانة بالورشة') + ')</div>' +
+                        '</div>' +
+                        '<span class="badge-status ' + statusClass + '">' + dev.status + '</span>' +
+                    '</div>' +
+                    '<div class="info-row">' +
+                        '<span>تاريخ الأوردر:</span>' +
+                        '<span>' + (dev.createdAt || '-') + '</span>' +
+                    '</div>' +
+                    '<div class="info-row">' +
+                        '<span>دور الفني في الأوردر:</span>' +
+                        '<span class="badge-role">' + roleText + '</span>' +
+                    '</div>' +
+                    '<div class="tech-card-financial">' +
+                        '<span style="font-size: 0.82rem; color: var(--text-muted);">نسبة الفني المستحقة:</span>' +
+                        '<span style="color:' + (isDelivered ? 'var(--success)' : 'var(--text-muted)') + '; font-weight: bold; font-size: 0.9rem;">' +
+                            (isDelivered ? commission + ' ج.م' : '0 ج.م (' + dev.status + ')') +
+                        '</span>' +
+                    '</div>';
+                    container.appendChild(card);
+                }
+            }
+
+            if (count === 0) {
+                container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 30px;">لا توجد أوردرات مسجلة لهذا الفني بالفترة المحددة.</div>';
+                btnPrint.style.display = 'none';
+            } else {
+                btnPrint.style.display = 'block';
+            }
+
+            document.getElementById('tech-st-count').innerText = count.toString();
+            document.getElementById('tech-st-commission').innerText = totalCommission + ' ج.م';
+            statsArea.style.display = 'grid';
+        }
+
+        function printTechReport() {
+            var select = /** @type {HTMLSelectElement} */ (document.getElementById('tech-select-filter'));
+            var techName = select.options[select.selectedIndex].text;
+            var dateFrom = /** @type {HTMLInputElement} */ (document.getElementById('tech-date-from')).value || 'البداية';
+            var dateTo = /** @type {HTMLInputElement} */ (document.getElementById('tech-date-to')).value || 'الآن';
+            var printArea = document.getElementById('print-area');
+
+            var rows = '';
+            var totalComm = 0;
+
+            currentFilteredTechOrders.forEach(function(/** @type {any} */ o, /** @type {number} */ index) {
+                totalComm += o.calculatedCommission || 0;
+                
+                var isUnderMaintenance = (o.status !== 'تم التسليم' && o.status !== 'جاهز للتسليم' && o.status !== 'مرتجع بالورشة');
+                var isReturned = (o.status === 'مرتجع بالورشة');
+                
+                var rowClass = '';
+                if (isUnderMaintenance) rowClass = 'class="in-progress-row"';
+                else if (isReturned) rowClass = 'class="returned-row"';
+
+                var totalVal = o.total || 0;
+                var depositVal = o.deposit || 0;
+                var partsVal = o.parts || 0;
+                var transportVal = o.transport || 0;
+                var commVal = o.calculatedCommission || 0;
+
+                var paidAmountDisplay = (isUnderMaintenance || isReturned) ? depositVal : totalVal;
+
+                rows += '<tr ' + rowClass + '>' +
+                    '<td>' + (index + 1) + '</td>' +
+                    '<td><b>' + o.client + '</b></td>' +
+                    '<td>' + o.model + '</td>' +
+                    '<td>' + (o.serviceType || 'صيانة بالورشة') + '</td>' +
+                    '<td><b>' + paidAmountDisplay + ' ج.م</b></td>' +
+                    '<td>' + partsVal + ' ج.م</td>' +
+                    '<td>' + transportVal + ' ج.م</td>' +
+                    '<td><b style="color:#15803d;">' + commVal + ' ج.م</b></td>' +
+                '</tr>';
+            });
+
+            printArea.innerHTML = '<div class="print-header">' +
+                '<h2>صيانة مصر - تقرير مستحقات حسابات الفني</h2>' +
+                '<p style="margin-top:5px; font-size:13px;">اسم الفني: <b>' + techName + '</b> | الفترة من (<b>' + dateFrom + '</b>) إلى (<b>' + dateTo + '</b>)</p>' +
+            '</div>' +
+            '<table class="print-table">' +
+                '<thead>' +
+                    '<tr>' +
+                        '<th>#</th>' +
+                        '<th>اسم العميل</th>' +
+                        '<th>نوع الجهاز</th>' +
+                        '<th>مكان الصيانة</th>' +
+                        '<th>المبلغ المدفوع</th>' +
+                        '<th>قطع غيار</th>' +
+                        '<th>نقل</th>' +
+                        '<th>نسبة الفني</th>' +
+                    '</tr>' +
+                '</thead>' +
+                '<tbody>' + rows + '</tbody>' +
+            '</table>' +
+            '<div style="margin-top: 15px; font-size: 11px; color: #555;">* الصفوف المظللة بالأصفر: أجهزة قيد الصيانة (العربون فقط). الصفوف المظللة بالأحمر: أجهزة مرتجعة بالورشة.</div>' +
+            '<div style="margin-top: 20px; text-align: left; font-size: 14px; color:#000;">' +
+                '<p><b>إجمالي المستحق للصرف بالفترة: ' + totalComm + ' ج.م</b></p>' +
+            '</div>' +
+            '<div style="margin-top: 40px; display: flex; justify-content: space-between; font-size: 13px; color:#000;">' +
+                '<div>توقيع مسئول الحسابات: ....................</div>' +
+                '<div>توقيع واستلام الفني: ....................</div>' +
+            '</div>';
+
+            setTimeout(function() { window.print(); }, 100);
+        }
+
+        function openDeviceModal() {
+            /** @type {HTMLFormElement} */ (document.getElementById('device-form')).reset();
+            /** @type {HTMLInputElement} */ (document.getElementById('dev-id')).value = '';
+            /** @type {HTMLInputElement} */ (document.getElementById('dev-created-at')).value = '';
+            /** @type {HTMLInputElement} */ (document.getElementById('dev-iso-date')).value = '';
+            /** @type {HTMLInputElement} */ (document.getElementById('fin-parts-workshop')).value = '0';
+            document.getElementById('modal-title').innerText = 'إضافة أوردر جديد';
+            configureModalPermissions();
+            document.getElementById('device-modal').classList.add('active');
+        }
+
+        function configureModalPermissions() {
+            var wsSec = document.getElementById('section-workshop-inputs');
+            var finSec = document.getElementById('section-financial-inputs');
+            var gServiceType = document.getElementById('group-service-type');
+
+            var gTotal = document.getElementById('group-fin-total');
+            var gDeposit = document.getElementById('group-fin-deposit');
+            var gParts = document.getElementById('group-fin-parts');
+            var gTransport = document.getElementById('group-fin-transport');
+            var gPercent = document.getElementById('group-fin-percent');
+            var gFeeVal = document.getElementById('group-fin-fee-val');
+            var gNet = document.getElementById('group-fin-net');
+
+            wsSec.style.display = 'block';
+            finSec.style.display = 'block';
+            gServiceType.style.display = 'block';
+
+            gTotal.style.display = 'block';
+            gDeposit.style.display = 'block';
+            gParts.style.display = 'block';
+            gTransport.style.display = 'block';
+            gPercent.style.display = 'block';
+            gFeeVal.style.display = 'block';
+            gNet.style.display = 'block';
+
+            if (currentUser.role === 'workshop') {
+                gServiceType.style.display = 'none';
+                finSec.style.display = 'none';
+                /** @type {HTMLSelectElement} */ (document.getElementById('dev-service-type')).value = 'صيانة بالورشة';
+            } 
+            else if (currentUser.role === 'followup' || activeTab === 'followup') {
+                gServiceType.style.display = 'block';
+                gParts.style.display = 'none';
+                gTransport.style.display = 'none';
+                gPercent.style.display = 'none';
+                gFeeVal.style.display = 'none';
+                gNet.style.display = 'none';
+            } 
+            else if (currentUser.role === 'accountant') {
+                wsSec.style.display = 'block';
+            }
+        }
+
+        function closeDeviceModal() {
+            document.getElementById('device-modal').classList.remove('active');
+        }
+
+        /** @type {HTMLFormElement} */ (document.getElementById('device-form')).onsubmit = function(e) {
+            e.preventDefault();
+            var id = /** @type {HTMLInputElement} */ (document.getElementById('dev-id')).value || db.ref('devices').push().key;
+
+            var serviceTypeVal = 'صيانة بالورشة';
+            var gServiceTypeElem = document.getElementById('group-service-type');
+            if (gServiceTypeElem.style.display !== 'none') {
+                serviceTypeVal = /** @type {HTMLSelectElement} */ (document.getElementById('dev-service-type')).value;
+            } else if (currentUser.role === 'workshop') {
+                serviceTypeVal = 'صيانة بالورشة';
+            }
+
+            var total = parseFloat(/** @type {HTMLInputElement} */ (document.getElementById('fin-total')).value) || 0;
+            var deposit = parseFloat(/** @type {HTMLInputElement} */ (document.getElementById('fin-deposit')).value) || 0;
+            var parts = parseFloat(/** @type {HTMLInputElement} */ (document.getElementById('fin-parts')).value) || 0;
+            var transport = parseFloat(/** @type {HTMLInputElement} */ (document.getElementById('fin-transport')).value) || 0;
+            var techPercent = parseFloat(/** @type {HTMLInputElement} */ (document.getElementById('fin-tech-percent')).value) || 0;
+            var status = /** @type {HTMLSelectElement} */ (document.getElementById('dev-status')).value;
+
+            var netBeforeTech = total - (parts + transport);
+            var techFeeVal = 0;
+            if (status === 'تم التسليم' && netBeforeTech > 0 && techPercent > 0) {
+                techFeeVal = Math.round((netBeforeTech * techPercent) / 100);
+            }
+            var companyNetProfit = Math.round(total - (parts + transport + techFeeVal));
+            var remaining = total - deposit;
+
+            var dateStr = /** @type {HTMLInputElement} */ (document.getElementById('dev-created-at')).value;
+            var isoDateStr = /** @type {HTMLInputElement} */ (document.getElementById('dev-iso-date')).value;
+            var now = new Date();
+
+            if (!isoDateStr) {
+                var year = now.getFullYear();
+                var month = String(now.getMonth() + 1).padStart(2, '0');
+                var day = String(now.getDate()).padStart(2, '0');
+                isoDateStr = year + '-' + month + '-' + day;
+            }
+
+            if (!dateStr) {
+                dateStr = now.toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            }
+
+            var data = {
+                serviceType: serviceTypeVal,
+                client: /** @type {HTMLInputElement} */ (document.getElementById('dev-client')).value,
+                area: /** @type {HTMLInputElement} */ (document.getElementById('dev-area')).value,
+                model: /** @type {HTMLInputElement} */ (document.getElementById('dev-model')).value,
+                phone: /** @type {HTMLInputElement} */ (document.getElementById('dev-phone')).value,
+                fault: /** @type {HTMLInputElement} */ (document.getElementById('dev-fault')).value,
+                techPull: /** @type {HTMLInputElement} */ (document.getElementById('dev-tech-pull')).value,
+                techRepair: /** @type {HTMLInputElement} */ (document.getElementById('dev-tech-repair')).value,
+                partsUsed: /** @type {HTMLInputElement} */ (document.getElementById('dev-parts-used')).value,
+                notes: /** @type {HTMLTextAreaElement} */ (document.getElementById('dev-notes')).value,
+                status: status,
+                cardNum: /** @type {HTMLInputElement} */ (document.getElementById('dev-card-num')).value,
+                createdAt: dateStr,
+                rawDate: isoDateStr,
+                isoDate: isoDateStr,
+                total: total,
+                deposit: deposit,
+                parts: parts,
+                transport: transport,
+                techPercent: techPercent,
+                techFeeVal: techFeeVal,
+                remaining: remaining,
+                netProfit: companyNetProfit
+            };
+
+            db.ref('devices/' + id).update(data, function(/** @type {any} */ err) {
+                if (!err) {
+                    closeDeviceModal();
+                } else {
+                    alert('حدث خطأ أثناء حفظ البيانات!');
+                }
+            });
+        };
+
+        /** @param {string} id */
+        window.editDevice = function(id) {
+            var dev = devicesData[id];
+            if (!dev) return;
+
+            /** @type {HTMLInputElement} */ (document.getElementById('dev-id')).value = id;
+            /** @type {HTMLInputElement} */ (document.getElementById('dev-created-at')).value = dev.createdAt || '';
+            /** @type {HTMLInputElement} */ (document.getElementById('dev-iso-date')).value = getDeviceISODate(dev);
+            /** @type {HTMLSelectElement} */ (document.getElementById('dev-service-type')).value = dev.serviceType || 'صيانة بالورشة';
+            /** @type {HTMLInputElement} */ (document.getElementById('dev-client')).value = dev.client || '';
+            /** @type {HTMLInputElement} */ (document.getElementById('dev-area')).value = dev.area || '';
+            /** @type {HTMLInputElement} */ (document.getElementById('dev-model')).value = dev.model || '';
+            /** @type {HTMLInputElement} */ (document.getElementById('dev-phone')).value = dev.phone || '';
+            /** @type {HTMLInputElement} */ (document.getElementById('dev-fault')).value = dev.fault || '';
+            /** @type {HTMLInputElement} */ (document.getElementById('dev-tech-pull')).value = dev.techPull || '';
+            /** @type {HTMLInputElement} */ (document.getElementById('dev-tech-repair')).value = dev.techRepair || '';
+            /** @type {HTMLInputElement} */ (document.getElementById('dev-parts-used')).value = dev.partsUsed || '';
+            /** @type {HTMLTextAreaElement} */ (document.getElementById('dev-notes')).value = dev.notes || '';
+            /** @type {HTMLSelectElement} */ (document.getElementById('dev-status')).value = dev.status || 'قيد الصيانة';
+            /** @type {HTMLInputElement} */ (document.getElementById('dev-card-num')).value = dev.cardNum || '';
+
+            /** @type {HTMLInputElement} */ (document.getElementById('fin-total')).value = dev.total || 0;
+            /** @type {HTMLInputElement} */ (document.getElementById('fin-deposit')).value = dev.deposit || 0;
+            /** @type {HTMLInputElement} */ (document.getElementById('fin-parts')).value = dev.parts || 0;
+            /** @type {HTMLInputElement} */ (document.getElementById('fin-parts-workshop')).value = dev.parts || 0;
+            /** @type {HTMLInputElement} */ (document.getElementById('fin-transport')).value = dev.transport || 0;
+            /** @type {HTMLInputElement} */ (document.getElementById('fin-tech-percent')).value = dev.techPercent || 0;
+            calcNetProfit();
+
+            document.getElementById('modal-title').innerText = 'تعديل بيانات الأوردر';
+            configureModalPermissions();
+
+            document.getElementById('device-modal').classList.add('active');
+        };
+
+        /** @param {string} id */
+        window.deleteDevice = function(id) {
+            if (confirm('هل أنت تأكد من حذف هذا الأوردر نهائياً؟')) {
+                db.ref('devices/' + id).remove();
+            }
+        };
+
+        function renderUsersTable() {
+            var tbody = document.getElementById('users-table-body');
+            tbody.innerHTML = '';
+            for (var id in usersData) {
+                var u = usersData[id];
+                var tr = document.createElement('tr');
+                tr.innerHTML = '<td>' + u.username + '</td>' +
+                    '<td>' + getRoleLabel(u.role) + '</td>' +
+                    '<td>' + u.password + '</td>' +
+                    '<td>' +
+                        '<button class="btn btn-accent" style="padding:3px 8px; font-size:0.75rem;" onclick="window.editUser(\'' + id + '\')">تعديل</button>' +
+                        '<button class="btn btn-danger" style="padding:3px 8px; font-size:0.75rem;" onclick="window.deleteUser(\'' + id + '\')">حذف</button>' +
+                    '</td>';
+                tbody.appendChild(tr);
+            }
+        }
+
+        function openUserModal() {
+            /** @type {HTMLFormElement} */ (document.getElementById('user-form')).reset();
+            /** @type {HTMLInputElement} */ (document.getElementById('user-edit-id')).value = '';
+            document.getElementById('user-modal').classList.add('active');
+        }
+
+        function closeUserModal() {
+            document.getElementById('user-modal').classList.remove('active');
+        }
+
+        /** @type {HTMLFormElement} */ (document.getElementById('user-form')).onsubmit = function(e) {
+            e.preventDefault();
+            var id = /** @type {HTMLInputElement} */ (document.getElementById('user-edit-id')).value || /** @type {HTMLInputElement} */ (document.getElementById('usr-username')).value;
+            var data = {
+                username: /** @type {HTMLInputElement} */ (document.getElementById('usr-username')).value.trim(),
+                password: /** @type {HTMLInputElement} */ (document.getElementById('usr-password')).value.trim(),
+                role: /** @type {HTMLSelectElement} */ (document.getElementById('usr-role')).value
+            };
+
+            db.ref('users/' + id).update(data, function(/** @type {any} */ err) {
+                if (!err) closeUserModal();
+            });
+        };
+
+        /** @param {string} id */
+        window.editUser = function(id) {
+            var u = usersData[id];
+            if (!u) return;
+
+            /** @type {HTMLInputElement} */ (document.getElementById('user-edit-id')).value = id;
+            /** @type {HTMLInputElement} */ (document.getElementById('usr-username')).value = u.username;
+            /** @type {HTMLInputElement} */ (document.getElementById('usr-password')).value = u.password;
+            /** @type {HTMLSelectElement} */ (document.getElementById('usr-role')).value = u.role;
+            document.getElementById('user-modal').classList.add('active');
+        };
+
+        /** @param {string} id */
+        window.deleteUser = function(id) {
+            if (id === 'admin') {
+                alert('لا يمكن حذف حساب مدير النظام الرئيسي!');
+                return;
+            }
+            if (confirm('هل أنت تأكد من حساب هذا الموظف؟')) {
+                db.ref('users/' + id).remove();
+            }
+        };
+    </script>
+</body>
+</html>
