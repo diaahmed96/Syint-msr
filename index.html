@@ -174,7 +174,6 @@
             border-color: var(--primary);
         }
 
-        /* أزرار الفلترة مع دمج الأعداد بداخلها مباشرة */
         .filter-chips-bar {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -184,7 +183,7 @@
 
         @media (min-width: 768px) {
             .filter-chips-bar {
-                grid-template-columns: repeat(5, 1fr);
+                grid-template-columns: repeat(7, 1fr);
             }
         }
 
@@ -204,7 +203,7 @@
             border: 1px solid var(--border-color);
             padding: 12px 14px;
             border-radius: 14px;
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             text-align: center;
             cursor: pointer;
             transition: all 0.25s ease;
@@ -235,11 +234,12 @@
 
         .chip-all { font-size: 1rem; font-weight: bold; color: #ffffff; }
         .chip-repair { color: #f59e0b; font-weight: bold; }
+        .chip-company-recv { color: #06b6d4; font-weight: bold; }
         .chip-ready { color: #10b981; font-weight: bold; }
         .chip-delivered { color: #3b82f6; font-weight: bold; }
+        .chip-workshop-returned { color: #f97316; font-weight: bold; }
         .chip-returned { color: #ef4444; font-weight: bold; }
 
-        /* فصل جمالي وأنيق بين الفلاتر وقائمة العملاء */
         .section-divider {
             height: 1px;
             background: linear-gradient(90deg, transparent, var(--border-glow), transparent);
@@ -331,8 +331,10 @@
         }
 
         .status-repair { background: rgba(245, 158, 11, 0.15); color: var(--accent); border: 1px solid rgba(245, 158, 11, 0.3); }
+        .status-company-recv { background: rgba(6, 182, 212, 0.15); color: #22d3ee; border: 1px solid rgba(6, 182, 212, 0.3); }
         .status-ready { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
         .status-delivered { background: rgba(37, 99, 235, 0.15); color: #60a5fa; border: 1px solid rgba(37, 99, 235, 0.3); }
+        .status-workshop-returned { background: rgba(249, 115, 22, 0.15); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.3); }
         .status-returned { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
 
         .arrow-icon {
@@ -538,7 +540,6 @@
             </div>
         </header>
 
-        <!-- شريط التنبيهات العاجل -->
         <div class="notice-ticker" id="notice-ticker">
             <span>📢 نظام صيانة مصر يعمل بكفاءة. جاري تحديث الأوردرات الفورية وإشعارات الحسابات.</span>
         </div>
@@ -559,7 +560,7 @@
                 <button class="btn btn-accent" id="add-device-btn" onclick="openDeviceModal()">+ إضافة أوردر جديد</button>
             </div>
 
-            <!-- أزرار الفلترة المدمج بداخلها الأعداد التلقائية والمحدثة أوتوماتيك -->
+            <!-- أزرار الفلترة تحتوي على الحالات الـ 6 كاملة -->
             <div class="filter-chips-bar" id="filter-chips-container">
                 <div class="filter-chip filter-chip-full active chip-all" onclick="setFilterStatus('all', this)">
                     <span>الكل</span>
@@ -569,6 +570,10 @@
                     <span>قيد الصيانة</span>
                     <span class="chip-count" id="count-repair">0</span>
                 </div>
+                <div class="filter-chip chip-company-recv" onclick="setFilterStatus('استلام شركة', this)">
+                    <span>استلام شركة</span>
+                    <span class="chip-count" id="count-company-recv">0</span>
+                </div>
                 <div class="filter-chip chip-ready" onclick="setFilterStatus('جاهز للتسليم', this)">
                     <span>جاهز للتسليم</span>
                     <span class="chip-count" id="count-ready">0</span>
@@ -577,13 +582,16 @@
                     <span>تم التسليم</span>
                     <span class="chip-count" id="count-delivered">0</span>
                 </div>
-                <div class="filter-chip chip-returned" onclick="setFilterStatus('مرتجع بالورشة', this)">
+                <div class="filter-chip chip-workshop-returned" onclick="setFilterStatus('مرتجع ورشة', this)">
                     <span>مرتجع ورشة</span>
+                    <span class="chip-count" id="count-workshop-returned">0</span>
+                </div>
+                <div class="filter-chip chip-returned" onclick="setFilterStatus('راجع بدون إصلاح', this)">
+                    <span>راجع بدون إصلاح</span>
                     <span class="chip-count" id="count-returned">0</span>
                 </div>
             </div>
 
-            <!-- فصل جمالي وأنيق بين الفلاتر وقائمة الأوردرات -->
             <div class="section-divider"></div>
 
             <div class="devices-grid" id="devices-container"></div>
@@ -698,11 +706,14 @@
                         </div>
                         <div class="form-group">
                             <label>حالة الأوردر</label>
+                            <!-- القائمة المنسدلة تحتوي على الحالات الـ 6 كاملة -->
                             <select id="dev-status" onchange="calcNetProfit()">
                                 <option value="قيد الصيانة">قيد الصيانة</option>
-                                <option value="مرتجع بالورشة">مرتجع بالورشة</option>
-                                <option value="جاهز للتسليم">جاهز للتسليم / تم الإصلاح</option>
-                                <option value="تم التسليم">تم التسليم والتحصيل</option>
+                                <option value="استلام شركة">استلام شركة</option>
+                                <option value="جاهز للتسليم">جاهز للتسليم</option>
+                                <option value="تم التسليم">تم التسليم</option>
+                                <option value="مرتجع ورشة">مرتجع ورشة</option>
+                                <option value="راجع بدون إصلاح">راجع بدون إصلاح</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -1050,7 +1061,7 @@
         }
 
         function updateFilterCounts() {
-            var cAll = 0, cRepair = 0, cReady = 0, cDelivered = 0, cReturned = 0;
+            var cAll = 0, cRepair = 0, cCompanyRecv = 0, cReady = 0, cDelivered = 0, cWorkshopReturned = 0, cReturned = 0;
 
             for (var id in devicesData) {
                 var dev = devicesData[id];
@@ -1059,15 +1070,19 @@
 
                 cAll++;
                 if (dev.status === 'قيد الصيانة') cRepair++;
+                else if (dev.status === 'استلام شركة') cCompanyRecv++;
                 else if (dev.status === 'جاهز للتسليم') cReady++;
                 else if (dev.status === 'تم التسليم') cDelivered++;
-                else if (dev.status === 'مرتجع بالورشة') cReturned++;
+                else if (dev.status === 'مرتجع ورشة') cWorkshopReturned++;
+                else if (dev.status === 'راجع بدون إصلاح') cReturned++;
             }
 
             document.getElementById('count-all').innerText = cAll.toString();
             document.getElementById('count-repair').innerText = cRepair.toString();
+            document.getElementById('count-company-recv').innerText = cCompanyRecv.toString();
             document.getElementById('count-ready').innerText = cReady.toString();
             document.getElementById('count-delivered').innerText = cDelivered.toString();
+            document.getElementById('count-workshop-returned').innerText = cWorkshopReturned.toString();
             document.getElementById('count-returned').innerText = cReturned.toString();
         }
 
@@ -1157,9 +1172,11 @@
                 card.id = 'device-card-' + id;
 
                 var statusClass = 'status-repair';
-                if (dev.status === 'جاهز للتسليم') statusClass = 'status-ready';
-                if (dev.status === 'تم التسليم') statusClass = 'status-delivered';
-                if (dev.status === 'مرتجع بالورشة') statusClass = 'status-returned';
+                if (dev.status === 'استلام شركة') statusClass = 'status-company-recv';
+                else if (dev.status === 'جاهز للتسليم') statusClass = 'status-ready';
+                else if (dev.status === 'تم التسليم') statusClass = 'status-delivered';
+                else if (dev.status === 'مرتجع ورشة') statusClass = 'status-workshop-returned';
+                else if (dev.status === 'راجع بدون إصلاح') statusClass = 'status-returned';
 
                 var serviceType = dev.serviceType || 'صيانة بالورشة';
                 var typeClass = serviceType === 'إصلاح منزلي' ? 'type-home' : 'type-workshop';
@@ -1321,9 +1338,11 @@
                     currentFilteredTechOrders.push(copyDev);
 
                     var statusClass = 'status-repair';
+                    if (dev.status === 'استلام شركة') statusClass = 'status-company-recv';
                     if (dev.status === 'جاهز للتسليم') statusClass = 'status-ready';
                     if (dev.status === 'تم التسليم') statusClass = 'status-delivered';
-                    if (dev.status === 'مرتجع بالورشة') statusClass = 'status-returned';
+                    if (dev.status === 'مرتجع ورشة') statusClass = 'status-workshop-returned';
+                    if (dev.status === 'راجع بدون إصلاح') statusClass = 'status-returned';
 
                     var card = document.createElement('div');
                     card.className = 'tech-order-card';
@@ -1377,8 +1396,8 @@
             currentFilteredTechOrders.forEach(function(/** @type {any} */ o, /** @type {number} */ index) {
                 totalComm += o.calculatedCommission || 0;
                 
-                var isUnderMaintenance = (o.status !== 'تم التسليم' && o.status !== 'جاهز للتسليم' && o.status !== 'مرتجع بالورشة');
-                var isReturned = (o.status === 'مرتجع بالورشة');
+                var isUnderMaintenance = (o.status !== 'تم التسليم' && o.status !== 'جاهز للتسليم' && o.status !== 'استلام شركة' && o.status !== 'مرتجع ورشة' && o.status !== 'راجع بدون إصلاح');
+                var isReturned = (o.status === 'مرتجع ورشة' || o.status === 'راجع بدون إصلاح');
                 
                 var rowClass = '';
                 if (isUnderMaintenance) rowClass = 'class="in-progress-row"';
@@ -1423,7 +1442,7 @@
                 '</thead>' +
                 '<tbody>' + rows + '</tbody>' +
             '</table>' +
-            '<div style="margin-top: 15px; font-size: 11px; color: #555;">* الصفوف المظللة بالأصفر: أجهزة قيد الصيانة (العربون فقط). الصفوف المظللة بالأحمر: أجهزة مرتجعة بالورشة.</div>' +
+            '<div style="margin-top: 15px; font-size: 11px; color: #555;">* الصفوف المظللة بالأصفر: قيد الصيانة أو استلام شركة. الصفوف المظللة بالأحمر: الأجهزة المرتجعة أو الراجعة بدون إصلاح.</div>' +
             '<div style="margin-top: 20px; text-align: left; font-size: 14px; color:#000;">' +
                 '<p><b>إجمالي المستحق للصرف بالفترة: ' + totalComm + ' ج.م</b></p>' +
             '</div>' +
@@ -1628,6 +1647,10 @@
                 tbody.appendChild(tr);
             }
         }
+
+        (function() {
+            // Internal setup wrapper
+        })();
 
         function openUserModal() {
             /** @type {HTMLFormElement} */ (document.getElementById('user-form')).reset();
