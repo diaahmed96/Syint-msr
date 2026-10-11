@@ -541,7 +541,7 @@
         </header>
 
         <div class="notice-ticker" id="notice-ticker">
-            <span>📢 نظام صيانة مصر يعمل بكفاءة. جاري تحديث الأوردرات الفورية وإشعارات الحسابات.</span>
+            <span>📢 نظام صيانة مصر يعمل بكفاءة. تم تفعيل فحص تكرار الأوردرات وتحسين البحث الذكي.</span>
         </div>
 
         <div class="nav-tabs" id="main-nav-tabs">
@@ -556,11 +556,10 @@
 
         <div class="main-container">
             <div class="controls-bar" id="controls-area">
-                <input type="text" id="search-box" class="search-input" placeholder="بحث باسم العميل، الموديل، الهاتف، أو الفني..." oninput="renderDevices()">
+                <input type="text" id="search-box" class="search-input" placeholder="ابحث باسم العميل، الموديل، الهاتف، الفني، أو رقم الكارت..." oninput="renderDevices()">
                 <button class="btn btn-accent" id="add-device-btn" onclick="openDeviceModal()">+ إضافة أوردر جديد</button>
             </div>
 
-            <!-- أزرار الفلترة تحتوي على الحالات الـ 6 كاملة -->
             <div class="filter-chips-bar" id="filter-chips-container">
                 <div class="filter-chip filter-chip-full active chip-all" onclick="setFilterStatus('all', this)">
                     <span>الكل</span>
@@ -706,7 +705,6 @@
                         </div>
                         <div class="form-group">
                             <label>حالة الأوردر</label>
-                            <!-- القائمة المنسدلة تحتوي على الحالات الـ 6 كاملة -->
                             <select id="dev-status" onchange="calcNetProfit()">
                                 <option value="قيد الصيانة">قيد الصيانة</option>
                                 <option value="استلام شركة">استلام شركة</option>
@@ -717,7 +715,7 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>رقم الكارت / السيريال (اختياري)</label>
+                            <label>رقم الكارت / السيريال (يولد تلقائياً)</label>
                             <input type="text" id="dev-card-num" placeholder="يولد تلقائياً إن ترك فارغاً">
                         </div>
                         <div class="form-group" style="grid-column: 1 / -1;" id="group-notes">
@@ -1164,7 +1162,9 @@
                                     normalizeArabicText(dev.phone).includes(search) ||
                                     normalizeArabicText(dev.techPull).includes(search) ||
                                     normalizeArabicText(dev.techRepair).includes(search) ||
-                                    normalizeArabicText(dev.cardNum).includes(search);
+                                    normalizeArabicText(dev.cardNum).includes(search) ||
+                                    normalizeArabicText(dev.area).includes(search) ||
+                                    normalizeArabicText(dev.fault).includes(search);
                 if (!matchSearch) continue;
 
                 var card = document.createElement('div');
@@ -1215,7 +1215,7 @@
                 card.innerHTML = '<div class="device-summary-header" onclick="window.toggleCard(\'' + id + '\')">' +
                     '<div class="client-info-preview">' +
                         '<div class="device-title">' + dev.client + '</div>' +
-                        '<div class="device-subtitle">' + dev.model + '</div>' +
+                        '<div class="device-subtitle">' + dev.model + (dev.cardNum ? ' (كارت: ' + dev.cardNum + ')' : '') + '</div>' +
                     '</div>' +
                     '<div class="header-actions-preview">' +
                         '<span class="badge-type ' + typeClass + '">' + serviceType + '</span>' +
@@ -1225,6 +1225,7 @@
                 '</div>' +
                 '<div class="device-details-body">' +
                     '<div class="info-row"><span>نوع الخدمة:</span> <span style="color: var(--accent); font-weight:bold;">' + serviceType + '</span></div>' +
+                    '<div class="info-row"><span>رقم الكارت / السيريال:</span> <span style="color:var(--accent); font-weight:bold;">' + (dev.cardNum || 'غير محدد') + '</span></div>' +
                     '<div class="info-row"><span>تاريخ الدخول / الطلب:</span> <span>' + (dev.createdAt || '-') + '</span></div>' +
                     '<div class="info-row"><span>المنطقة:</span> <span>' + (dev.area || 'غير محدد') + '</span></div>' +
                     '<div class="info-row"><span>العطل:</span> <span>' + (dev.fault || '-') + '</span></div>' +
@@ -1460,6 +1461,11 @@
             /** @type {HTMLInputElement} */ (document.getElementById('dev-created-at')).value = '';
             /** @type {HTMLInputElement} */ (document.getElementById('dev-iso-date')).value = '';
             /** @type {HTMLInputElement} */ (document.getElementById('fin-parts-workshop')).value = '0';
+            
+            // توليد رقم كارت تلقائي تسلسلي مؤقت أو عشوائي فريد لو حابب
+            var autoCardId = 'MSR-' + Math.floor(1000 + Math.random() * 9000);
+            /** @type {HTMLInputElement} */ (document.getElementById('dev-card-num')).value = autoCardId;
+
             document.getElementById('modal-title').innerText = 'إضافة أوردر جديد';
             configureModalPermissions();
             document.getElementById('device-modal').classList.add('active');
@@ -1514,7 +1520,39 @@
 
         /** @type {HTMLFormElement} */ (document.getElementById('device-form')).onsubmit = function(e) {
             e.preventDefault();
-            var id = /** @type {HTMLInputElement} */ (document.getElementById('dev-id')).value || db.ref('devices').push().key;
+            var editingId = /** @type {HTMLInputElement} */ (document.getElementById('dev-id')).value;
+            var id = editingId || db.ref('devices').push().key;
+
+            var clientInput = /** @type {HTMLInputElement} */ (document.getElementById('dev-client')).value.trim();
+            var areaInput = /** @type {HTMLInputElement} */ (document.getElementById('dev-area')).value.trim();
+            var techPullInput = /** @type {HTMLInputElement} */ (document.getElementById('dev-tech-pull')).value.trim();
+            var cardNumInput = /** @type {HTMLInputElement} */ (document.getElementById('dev-card-num')).value.trim();
+
+            // فحص تكرار الأوردر بناءً على: (اسم العميل + المنطقة + اسم الفني الساحب)
+            var normNewClient = normalizeArabicText(clientInput);
+            var normNewArea = normalizeArabicText(areaInput);
+            var normNewTech = normalizeArabicText(techPullInput);
+
+            for (var existingId in devicesData) {
+                if (editingId && existingId === editingId) continue; // استثناء الأوردر الحالي أثناء التعديل
+                
+                var existingDev = devicesData[existingId];
+                var normExistClient = normalizeArabicText(existingDev.client);
+                var normExistArea = normalizeArabicText(existingDev.area);
+                var normExistTech = normalizeArabicText(existingDev.techPull);
+
+                if (normNewClient && normExistClient && normNewClient === normExistClient &&
+                    normNewArea && normExistArea && normNewArea === normExistArea &&
+                    normNewTech && normExistTech && normNewTech === normExistTech) {
+                    
+                    var confirmMsg = '⚠️ تنبيه: يوجد أوردر مسجل مسبقاً بنفس بيانات العميل والمنطقة والفني الساحب!\n\nاسم العميل: ' + existingDev.client + '\nالمنطقة: ' + existingDev.area + '\nالفني الساحب: ' + existingDev.techPull + '\nحالة الجهاز السابق: ' + existingDev.status + '\n\n(هذه الميزة مخصصة لحالة سحب جهازين أو أكثر لنفس العميل).\n\nهل تريد المتابعة وإضافة هذا الأوردر الجديد على أي حال؟';
+                    
+                    if (!confirm(confirmMsg)) {
+                        return; // لو المستخدم اختار إلغاء، يوقف الحفظ
+                    }
+                    break;
+                }
+            }
 
             var serviceTypeVal = 'صيانة بالورشة';
             var gServiceTypeElem = document.getElementById('group-service-type');
@@ -1556,17 +1594,17 @@
 
             var data = {
                 serviceType: serviceTypeVal,
-                client: /** @type {HTMLInputElement} */ (document.getElementById('dev-client')).value,
-                area: /** @type {HTMLInputElement} */ (document.getElementById('dev-area')).value,
+                client: clientInput,
+                area: areaInput,
                 model: /** @type {HTMLInputElement} */ (document.getElementById('dev-model')).value,
-                phone: /** @type {HTMLInputElement} */ (document.getElementById('dev-phone')).value,
+                phone: /** @type {HTMLInputElement} */ (document.getElementById('dev-phone')).value.trim(),
                 fault: /** @type {HTMLInputElement} */ (document.getElementById('dev-fault')).value,
-                techPull: /** @type {HTMLInputElement} */ (document.getElementById('dev-tech-pull')).value,
+                techPull: techPullInput,
                 techRepair: /** @type {HTMLInputElement} */ (document.getElementById('dev-tech-repair')).value,
                 partsUsed: /** @type {HTMLInputElement} */ (document.getElementById('dev-parts-used')).value,
                 notes: /** @type {HTMLTextAreaElement} */ (document.getElementById('dev-notes')).value,
                 status: status,
-                cardNum: /** @type {HTMLInputElement} */ (document.getElementById('dev-card-num')).value,
+                cardNum: cardNumInput,
                 createdAt: dateStr,
                 rawDate: isoDateStr,
                 isoDate: isoDateStr,
@@ -1647,10 +1685,6 @@
                 tbody.appendChild(tr);
             }
         }
-
-        (function() {
-            // Internal setup wrapper
-        })();
 
         function openUserModal() {
             /** @type {HTMLFormElement} */ (document.getElementById('user-form')).reset();
